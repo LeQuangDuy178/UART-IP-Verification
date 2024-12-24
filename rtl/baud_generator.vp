@@ -1,0 +1,20 @@
+module baud_generator ( input wire clk,
+                        input wire resetn,
+                        input wire enable,
+                        input wire [15:0] divisor,
+                        output reg bclk);
+
+`protected 
+    MTI!#[He<*!1DQuRZisn[Wee2a-Bne+vxe,<O7@BeEE"BZ6|>1v_[@<Kx'nQaG2l@U-kPO-7u*R\
+    C$e-*1',+Z-l;lAuo}WpDY,QQ\1o]c[<V$I#QGMr3'laj#3l6I><1p7RUT{Y^N~$QYG3UA[2URAR
+    #OC'xoIA{EZx1T2eTCepEEt1w@{:*UO~DoGaH.peu}K<5E}@JIjWXuW7[T^c<OsHCW2QE?!BH$=b
+    z7iY\<X3h=Dj!q?5-Th|a_\?3}#7RV=[3RVn-1@=9%)>Y#OUE#5Hw5HUX1R86B5Y+_Jp!;xb^DBK
+    BxnI=uD}a<1^V*'BXE[#>Vv}DHwz+nn3KYHub[KWouzC#sJ@@E2O{=_!Rk7,3xx=pQzk{|m5Il}?
+    <$i<3}![TJ(p$i{1?!JIU~,HsiH<=inX]_~i1Ei+=u=2A1^Zr^sKwaCq7pk}Sl_iTER#vHj#1$He
+    ]aEe7wn+7k]xYnYa$iBnTzwC{>EK]3';J,]n]*)Gl<!&H_DH[s_ezz!ll]Z'PqYIn@o$ji}!'*jA
+    UAw&r<HBEk[*L!aTYIsi3}kX[}-*#I?;vRwZojOYk5iE$Ei@$B_]s-nYX8rG5oY_IE}J{OQkwETT
+    eD?+@xIkBC=?JI5N'2OKB<Gra>2Qep^p|3YU;2+j_1on@K<,W~TT@?E?+kXn,IX!p~p<XCXBlQlG
+    IY:7J*alZT-oA]
+`endprotected
+endmodule
+

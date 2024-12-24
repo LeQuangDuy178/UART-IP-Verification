@@ -1,0 +1,82 @@
+module apb_decoder (// APB interface
+                    input wire pclk, 
+                    input wire presetn,
+                    input wire [9:0]  paddr, 
+                    input wire        psel, 
+                    input wire        penable, 
+                    input wire        pwrite, 
+                    input wire [31:0] pwdata,
+                    output wire       pready, 
+                    output reg [31:0] prdata, 
+                    output wire       pslverr,
+                    
+                    // Divisor setting
+                    output wire       osm_sel,
+                    output wire [7:0] dll,
+                    output wire [7:0] dlh,
+                    
+                    // UART setting
+                    output wire       bge,
+                    output wire       eps,
+                    output wire       pen,
+                    output wire       stb,
+                    output wire [1:0] wls,
+            
+                    // Enable Hard Interrupt
+                    output wire en_tx_fifo_full,
+                    output wire en_tx_fifo_empty,
+                    output wire en_rx_fifo_full,
+                    output wire en_rx_fifo_empty,
+                    output wire en_parrity_error,
+
+                    // Parity error
+                    input  wire s_parrity_error,
+                    output reg  parrity_error_status,
+
+                    // TX FIFO
+                    input  wire       tx_full_status,
+                    input  wire       tx_empty_status,
+                    output reg        tx_wr,
+                    output wire [7:0] tx_data,
+
+                    //RX FIFO
+                    input  wire       rx_full_status,
+                    input  wire       rx_empty_status,
+                    input  wire [7:0] rx_data,
+                    output reg        rx_rd
+                    );
+`protected
+
+    MTI!#}\Vx\{!?E,!\B@ZR&X=@j2+x>XnpewRD[G3>KN1W=K=3lz^u'2*@H$=Z]l?DV3c',DaGd{s
+    Wx[i3W7@m#C2r7o}Ew3lEo52I;Y[i?3s7v2U-El[_+1FhGnRm|^i^I~T-2[{tR*B;}u1D#jX{8$D
+    !sAwu73Uu@feHlo=>avI5z,\$\W7C\QC[UEBx*v+$CQ"/^1C7}m2_l3z$]*]UE51<}t!x@$AjQC^
+    3Wn=$5[\o$Da5avyOn~5raz]i,rxmAYl:z^QzNAwp-}'ER?>Zw7?3pC,RVaG#G{_Amh-pr!1VA>^
+    Cwrb*<V'IY~Q4:Os<J~{w;el;~8x-;apvOJHevnZ5__Wwa!='{}XzIe=a[\pi-3<H*BGiT{1VDma
+    TTE@Qp#fvD>^fUxI@C[[w>x!=Or*[-=@@osj1}iajp]H3[\QOelGY]u*Rxk5{_UAEsf$m+7GQCi9
+    a]kpF2]u^Dk+o*z?KUGpa$a*p5jVkBAvRrGVB(@<-@#DV$PaR##t!}Q+=rHQceAV*EC1ID=u'=WX
+    j\'lHj*-_~6v;UoHD*I=_+J55D@$^>'6cKDT{O{$kj^'?kDej@$Q#*R=DrQ-C>5Z<}Y,}l#n+so-
+    R^WK=7o$=vi'{<G1l_Rp\Y7&z/}v"HzB7]epw:pHAk=;v5*CJZ_>HpO2'7:?T=BQzkKsk<r5op@x
+    R2A*o-RiT@xTo(0[klk&RAp#fO,o^'2~;N(>$r=MRO#~j@D;YC^n/wwD-Od1?}Ku=*<Zr;vZq|)}
+    {u7HjilbFPWBVpdsYkIxxB7GxV}<5IIOGrCB\#3fz\KAO[Ik$lY{B!m*\pUrK<eDdiw_C26EXw!4
+    m-,wn$wQk9^O@QB?^xre'Kq+\Gz+HZ<YE3-eY#'8$;H{I=QB|fpm}]Evj!=Xw5{$-A/U+do!Gkl$
+    ?[],;pQw]Bmz*7$=IR8=CB{}K@Gxv?$zeI{KaK-?O[l|rZ!Q;}$sAeo,eBQDteiIRm[l_7WK@sCw
+    Q,BE5^X\'5jGaI{n~$RK5uv?=G[V1ysaV[s=\1B@ozk6lVB^XSYnIp^ls2uDp-KjTT7s><7\;C\s
+    oY~s5[\BZl%K=*uIp!oz-YnR#J#<Ho^,Q!*,~DE<vRzpQ?vjU~I*@;D[5iJws[#=j-<3oDk[ujj]
+    CIXuQ]Kl~[uHwRlr\\JGHE1prn<~z'HWHY@V<5pVnX\)fLBzEpA{_]l1?$RUp\l^nUe[;1aT^IJ]
+    GG|C{nOn$^3T{l7H<xKnr?Gma1Y'IavKIe;ADX\o>ru3T\@xvGG\?ppEV1$'H7RrxIGT1#R;R5nE
+    K'_6(nTH]s5]Y3'JkxpB'C-;3Z=XH*57Oq@Y$7*AApQ*3]ekl*T'YI-1\aG7K3zGp_K1XTw}AoZ*
+    x'jKGU#so3osjV}al7j_ueWYp</w&awDBFxW!WlWTxOQWQn[TvY*w$Rp,^B<IBrT]]f~Q?Kr=r~Q
+    @xD5A7X3^U2l<o{&AH]3[;jUv$JrX^v<',Y;l]1ruXO[.y3s+<C?Tw<=?]3siuYa$1-wjH~Gj-WV
+    ,Hv3UoaC=eemJ71r{V|xjJ{Eo]$BoW^Kv?jGw1K'u_xjzxuOkTn&@1nJHR7Gb'3@3<E*l$eAjE=+
+    =J1>BIO?2YCpDDV*n[BDv=>^{YV[H$k$AsvBH96xICTn1k@n_e+Uv-]Y+AnBlK[T>allu[D%7{[\
+    5s%R@;5WTGV7?Rj9OXvv,5=uuo2oJejuM=~@I,HjU?DGOB\<2r{V]o*+*<TLgDs]nH}-E&Mi]xJ+
+    -v!?pw}V_DR!=k,@=E?vxUXMjp_U7;>}wDo}a=H#G{<KrpZOX*@[_i@;f}z-pi>I]c{YX{!eA1AO
+    #Yil}j6BCzl@Ci}'+T]fKIAQ1H2^4j*v]A[]@(@DjR}\~HuH>?T^1<@>;^6e=xGAa35rE5Ja1i#k
+    QYCy2lR!5}C1wSA+Z=iHWkq[!2@vV=vW*eRo];!Dlp}NppJ{ok{_!Ny5D1D$v_-zz#Bee5Ez3Jvw
+    s7+E<2<=m$IZ'[-7jZ=nva_j7<IX,<}GTAz%)hQBC5aIDu{[_o:3BRZH+ABVV'X4irjT8qQnDCr5
+    Ej7BCvsQnDo>}3K'=w[3_-HzW>O~s5<Bzs-{IYlH'Qqr*7o|*\@{-+*Ajz<<Ox[TYADB=KQz[W}k
+    ZR!
+`endprotected
+endmodule
+
+

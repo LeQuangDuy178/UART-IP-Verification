@@ -1,0 +1,27 @@
+module uart_interrupt( output wire tx_fifo_full,
+                       output wire tx_fifo_empty,
+                       output wire rx_fifo_full,
+                       output wire rx_fifo_empty,
+                       output wire parrity_error,
+
+                       // Enable
+                       input wire en_tx_fifo_full,
+                       input wire en_tx_fifo_empty,
+                       input wire en_rx_fifo_full,
+                       input wire en_rx_fifo_empty,
+                       input wire en_parrity_error,
+
+                       // Status
+                       input wire tx_full_status,
+                       input wire tx_empty_status,
+                       input wire rx_full_status,
+                       input wire rx_empty_status,
+                       input wire parrity_error_status
+                     );
+`protected 
+    MTI!#s,{GZHJaH[!ECHx\CKJ@j\$m|k<]#[#h73BW|.)7e<j&|g7u_Qs-}]?YQn*3Rj]vRJuVi*v
+    +*WcoMWOIY4=-5imV$v<8vw5~tR3RYTrIvl-^-^<s5wR$kQ-*Dr27s,[KE_BA@5o!DoH!G=}3~iU
+    BJwswrB+aVm$rI].-]ICz,;IR-\pT]TVc^~moNw>2Ew-AnYr+uDJz;#[Ur~H{kf*=e>v]T{X[oKt
+    =II]rie[|&}OG$#{*?}k{lYCTp5$$
+`endprotected
+endmodule

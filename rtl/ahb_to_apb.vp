@@ -1,0 +1,135 @@
+//-----------------------------------------------------------------------------
+// The confidential and proprietary information contained in this file may
+// only be used by a person authorised under and to the extent permitted
+// by a subsisting licensing agreement from ARM Limited.
+//
+//            (C) COPYRIGHT 2010-2013 ARM Limited.
+//                ALL RIGHTS RESERVED
+//
+// This entire notice must be reproduced on all copies of this file
+// and copies of this file may only be made by a person if such person is
+// permitted to do so under the terms of a subsisting license agreement
+// from ARM Limited.
+//
+//      SVN Information
+//
+//      Checked In          : $Date: 2012-10-18 17:09:33 +0100 (Thu, 18 Oct 2012) $
+//
+//      Revision            : $Revision: 225826 $
+//
+//      Release Information : Cortex-M System Design Kit-r1p0-00rel0
+//
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Simple AHB to APB bridge
+//-----------------------------------------------------------------------------
+// The bridge requires PCLK synchronised to HCLK
+// APB running at a clock divided from HCLK. E.g.
+// - If PCLK is same as HCLK, set PCLKEN to 1
+// - If PCLK is half the HCLK speed, toggle PCLKEN every HCLK cycle
+
+module cmsdk_ahb_to_apb #(
+  // Parameter to define address width
+  // 16 = 2^16 = 64KB APB address space
+  parameter     ADDRWIDTH = 16,
+  parameter     REGISTER_RDATA = 1,
+  parameter     REGISTER_WDATA = 0)
+ (
+// --------------------------------------------------------------------------
+// Port Definitions
+// --------------------------------------------------------------------------
+  input  wire                 HCLK,      // Clock
+  input  wire                 HRESETn,   // Reset
+  input  wire                 PCLKEN,    // APB clock enable signal
+
+  input  wire                 HSEL,      // Device select
+  input  wire [ADDRWIDTH-1:0] HADDR,     // Address
+  input  wire           [1:0] HTRANS,    // Transfer control
+  input  wire           [2:0] HSIZE,     // Transfer size
+  input  wire           [3:0] HPROT,     // Protection control
+  input  wire                 HWRITE,    // Write control
+  input  wire                 HREADY,    // Transfer phase done
+  input  wire          [31:0] HWDATA,    // Write data
+
+  output reg                  HREADYOUT, // Device ready
+  output wire          [31:0] HRDATA,    // Read data output
+  output wire                 HRESP,     // Device response
+                                         // APB Output
+  output wire [ADDRWIDTH-1:0] PADDR,     // APB Address
+  output wire                 PENABLE,   // APB Enable
+  output wire                 PWRITE,    // APB Write
+  output wire           [3:0] PSTRB,     // APB Byte Strobe
+  output wire           [2:0] PPROT,     // APB Prot
+  output wire          [31:0] PWDATA,    // APB write data
+  output wire                 PSEL,      // APB Select
+
+  output wire                 APBACTIVE, // APB bus is active, for clock gating
+                                         // of APB bus
+
+                                         // APB Input
+  input  wire          [31:0] PRDATA,    // Read data for each APB slave
+  input  wire                 PREADY,    // Ready for each APB slave
+  input  wire                 PSLVERR);  // Error state for each APB slave
+
+`protected
+
+    MTI!#kjkw;-$2xO<eJ'VV=Y_*kX'UDsZB8Hzj[y~E1i]@>2[#*\nozi]>;[}nx#aD;rjOA<O1]W?
+    aZxvl$DZ'+Z3>+uR=A=NsixKBI7+[BO~pn={;${BL$~*VUv~CP}~<XBEZ'Go[_RwjWDv-#&RkQpc
+    *QnI[n2]2=pG$~Y,[p*OE2]ZA\Wo}>-zI_$'=HU>+5jk5wurE<QKp|3oTZ6vGO1zn'3$Y!XlzxQp
+    3V?'e\5rjY2QO~B7xDH*=,_3=wn$+wlV^rV7m@1"/ICRY^n~2~\spt5*?>!n[YmHZwi*Z~v1i!QH
+    O@xZE+r@2p,Cmo_Tmuwaj+iYalJv<G$@YmHj1ZQ\u1VuD[Dpel.K\k-v$^AbMRIIT7;RWrJon@vA
+    3}#EDg;lk+Tzw@~_;=zD<XIXD@'^v5EjQ2#UKm{5K25Tue#5@px2K7$O[oiwDR-T<@LEJR$.^>7J
+    !91~P!wHD[},=o!z->^rI)pI{v#AI}u';>pR3wO#om73;AF=?*R0[$KXljpe7U=E\U-<Bk}kW{V5
+    ^li~Im$Rxh"alm,C52$wUjEi>KHO}-A~G,;3+',,@]A_UX<VwTo1*?;[xE<z/RkVE^zXuA[T1*XI
+    o[@\+!{7lSan~@kaB;7!OJDIYYC2GwylaeowzV;}#JzR>zs'k_H'ZV7P*uJR_<EOzX>z=}-zD^7v
+    >1T]ae_ReRU3w=$[-[{;W<^uqw,=T[zis>Tx\aa7Kj\is]jla}]]i^2V[-X'1JoHTli->r1o]1m3
+    ~U]7p-5p<AETAXzmR,G'COx#RCRKQ1q?DJ==m2^M"}'UxCkW-i]nZ|Rj_mmR>+cvWzO-vCUC3mB+
+    -a}Y{u@un~lk*3}$Q#e$TsVr]!kj{\v|KjV$Hs*{B-_aYk3RzuT{#}DIEZAGOz?C+pG7_7i]op{?
+    vTp[kV<!njEp:DWaHQ*-B#Rs++n32szpQee7{*DmW$=??~=H=5Hua&h+GWB:^ZDmbmjBWwnmV!\A
+    ?@HuEk5VeT]Q*sHx$yHjI(7iz{=s{~+Ax[D>_JC2U=@\C;7n$W$uVDxUQ[plpKfG@lJkT{3QZJ@^
+    3IkE!rIf0O^XIRj>]7fMuxQ$3t!T*rQ}+1XX-^*$?ZOEHT\e>Ah'kpI"6p3CJ$sr-7GiR]}oQ5<X
+    7<{Ww./X,lVDTrT0]?jY0;Ri^RoXrovz#z]1$I<CY;G~p37Tkz@{lnYrz;=Y@TEm[]=>sUC-KHxW
+    'AECUG'{1$w[CX<n]~{a["oK-{[AwUs7vp'aJ,:,7Zr-j3#H>V]H-Q>fE'<37Rj^oke]pDO=lY+z
+    n>Zn?=BDl1?ezXOmj~J7Ql>[\]'Z3^1JR?GH[#>}Bz3jV_7_l1YpwpI?'-5}[WTK%\l#2eV~G[(Y
+    @oWZ9pTE-gI<5Z$!AQ~}Gz>}TH:zvBR=zvZ7}J'pE-r7Eo*k7'JNP~Y;*o1kH=^E5zRomnp3o^Z$
+    xY;T,iozY_HGi|v-RYjJ<XZB,U\R',JsAz^O,-p52z!{wT5ITOR^Xr=;Gz-]3_^T{}jJu;DpjeB=
+    #Gjv{2v@zV*M]z{~XrY^F@'o'$B@W+Iulo\+us!'-^Xo~ekK#J75@VzxC=f{^I[viGs_wes8lG}Z
+    #aX-;TE[<w]v%Uz;^=G~Z>,_WXsaTQCp'9>GrpYUYAX8@AprB*lU7_TIK1oaG3VKU\B7yuBX2RT^
+    ^_ZW\>Q<j@O_@CpZ~<rH{T(Rz<+@{wWzA,7<{jAUCGok5W,G\eUCj;IzOG7UpA2w]E#uTJBCZU#x
+    >@AI#**b<la^[XJQV22U[ApB(rkx@ao2m[u~Zr$+T\eC#&2_G@i1S>r{vZtImZDI7O?O!n^A$IpB
+    mAs_X*G-}YAR$@~GIBXYE@J#}TW2Vme$&-1E'uRn#bE?RX1x@{7X1a*nm~w''RazUuo]oEArT1wI
+    -*U<,_$J>u5Gjz{I,BpTA}iC7B;$]=o@DwP{I>shAU*nK+w}aC-$;YB3y~Cu7KB@#^~B=Ks@'jY*
+    '553QG2<Zm+3'4QQVz[lKISv{}zRl}uF$+nC&vhb#GrB!xnTzi-@5KJ5oLJ]JWNsXDZ~l<Q<E,O[
+    zXwTB2z,i3TI#oJBO-m5GIlleWDY!>vB%?vTs2=XX$@BVxJ,I5_VuQE-enC*r3B-]xL*J\o>{plj
+    ~A\wjnR[#;-^yk1um/_j^iCenm0y(nlx$i}s,llr>i}{{uls78!^,'C~-DV@31!_Z!m1[@3{jUDY
+    H=7-JCo'<RL;eKR+[2E:=zsC_-a]Ww}uZYA*"V<![h1iD,AXe],OzJGe6Q[]W::b]!@E=WTEB@Yu
+    i*7>I6HTj^w]};x;[X^,<mH7#py7*1}]r!II!W=p_]171BGv%_'u\YUunUHyDV{RO[ko+{5{CX+~
+    a'~\0>e[@I?wXA<eBsYlo<<}}p'lJ~Q,{=eCUQK>IvaXIlJV[v5x?*rQm?sGvrm<vS{wH^ORXv\G
+    z]XXeYp5p>@X[A75O_AB~?]n7YVpX[>EsDRzA1\"Ik*GT7#lk[s!R>RvxX<~5D<O$eO+'W1Ha7<n
+    M$JX~iIuK!*Zz$R!xfDQB^H+nB@]<!B!eX4~e~BVjwHG+DTVV=aVoiB'!+B]um,{asDPHEBl^:{5
+    >^C^m<<EQD_DE@GC!Y(^npCh{5kAwv~aYoW[av~J^W!Ksv#AzT*Wpjmng*u32F=]To=#-1LxV@-(
+    ;C?pZDk,CD22_>;EJ^pkB!er5cK*T{z}1oZXzw^p#l'V*Zv1[Aix<^;t]A<Dm+<=KBiEl,=Bn*sa
+    }^AB\Oawa>x*CpBRmV2sBjCCD*JV#^W2tG{<IZOB;E5!$7viZp*ejrZA[=+AQ]R^sJ-[DvJT~'!-
+    Ju\a55-}rI<tEVoK@^o;@svaw<xTUQK,x,vz|FasE5kAIoDOYI>+[V?x^<Qnm?rW}KK[Wu+T>#D}
+    lTQWZ5ur,jGA=r=#^U<<X,E!I<1R[G[EeG-YKmOCkmZ>H#R;>ONe\v>kVw]O?O\zgYAVm{p?r_D7
+    21,p2\i<ow}-Q77~m>p!#ok-JQ<Hp5AQE*Geun*!UXC'}GX2=2BRCiRQ?'KnKAU}5m}2A[rY~UVk
+    $.1~;>>}1u|1+wW<^+V~>AHl+G]2XT~i7D>\\m;{Q<^euwr_<Ywz^WT+*J@MuBe!=]erAoJ1sB;@
+    it'kI]9T\rH}lr?6rGw]>$u[U+l}_^iQ+_{r2^2]GVZrQ<CVVUpoV'lk#YGCEs%-IWZdv0.$V1T>
+    _pJ~VoX:oC~W<a{,pR>5lzvj#*;p*:vWvxv}2]*CZmeE-=1@5pDilpYOB@WliV85kvuNb_A^1U>w
+    EZE*HpQur*2Ov[lU3B@pBh_+arCfjwA>C3K_UelvQ~a'&?C*2,**a&uU-7v^GW}HxXrCoW7uI]ws
+    HRICUZ~$AB0_O~vlk[V}!E>zXwel}]A^DZ]r3}<7[\JzZR!&kQ!mjoDeuG^G$#2+B^BuX$>=WsAn
+    s*5>}AEIm-G''x$uClu<w^{@f=]J\^qO\]XIT$~5uU-W>px_XCnl_CO=]CGs?,GD@\2n<n~3l_3u
+    {[i,=!RR}E!R[U$1u\{pWzQ[Om}KX<<%1nnj^<}Oh3Qn2$#peYlimg{s!l{-xiz}WBT7!VSm'Slr
+    13)lG2;${Op++BxEO@?xY+IO@_#W]GR#U$}w$m\5]>[OmE+y\$rm}<!Bbe=E^$~n<VC-~-1','5a
+    ~]jRrV~m~vHp,nQu#Y,MQoWT#Gx|s?vC2o1zw|NH1e#$e,,HnH\O15ahaIkl-[}I51ZvQwYC^2oG
+    !>o7\Z>3Tl*V!<}>0Ye{=<h<ETO,$]Kja$XvuHGn[-Om\va?nvTKCnCi]^n'z>]=<w$PjpJKW{jZ
+    vxTzO$K~dV{;K=V{px>Im:p?W??7\_pOXxXUnE7vaUUaa!FGWQ,@}p[#_v$QjsG27\H'KOCCp1G3
+    G=+w5YQID>7oG{WY!]aP]nE@[A{_Xe'UQjU=DHJE+7Ga5vx$Oq6*kAoUeo~j5'5EY=}B?VG3nTGl
+    U^[o\+a'nO?D>71EYv@F%wn[3HEQBO+!~m}YI'B\DKGeRux2l_aJ}CT17'|{[{u}>K*s#EE}HnTY
+    >RQ=IQj~AVr:^kXKl7C?XGw[K-KTn^p~0TT~nZo*$rrHI*J+5[#!@r23@aXzVYEWI3^AT^;pnYB@
+    Q2O-'<'BwlV?WDm${L=X2\Hj']TI?ap;w78#G_iy2'W[G+ElS\JQUv>T'ZaW$paTzI1kx+{+vlix
+    Hz[X>i},j*B'='PunO@GVvE>]F!-G<i5?sekOmzHrCzn7~e~{315sV=oaG*G@$mHeAZAKVlW~=Xv
+    !26<v#[}2T}{HxQn[uCKjW[^#,'wOKBp<
+`endprotected
+endmodule
+

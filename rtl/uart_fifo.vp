@@ -1,0 +1,22 @@
+module uart_fifo (input wire pclk,
+                  input wire presetn,
+                  input wire wr,
+                  input wire rd,
+                  input wire [7:0] data_in,
+                  output wire [7:0] data_out,
+                  output wire fifo_full,
+                  output wire fifo_empty);
+`protected
+
+    MTI!#O{]~D+G}7CT\=R]I'RKu,59^Q2QI^j$|(K<o[ci5'!!|UsXVi+-{mC+xGiXRGuemOOm7Xe:
+    %I+}Ka,{Y}ToKxuT~@l[n^~Vw5$~^5'ZZGrX^O,+>#}X>;=R*9^]il<<{kQB{~~\jGG"{UlxBp-H
+    CIs-B@Ho^?'B=Zps$ZAI5{Gi?e5U:l\vGYT*a'jx]^w][KjvK=Jz{i9m}1T)#]}ifi7<<>Rp52En
+    EaxOpaAC^.!Ck{isleYrTR1;rs=+_J}~Q!OO#k_[1We<TkF[JXw|A];J~s^$?l!}z1}JaOm-TOs#
+    a]WC*Gm@eA}-7?5rbn,mlvl{^_3zB5$CuC'ZG!S/iT+<5VJpLHj?j[3Ww35i+VnX}spxi=I3B#j?
+    ,6uE1lrzvi52s_lHW+]5mv_jzinTZrz]}{/\?[T$[e[oJJC6OpkZx}KV73@]Qju,[c'R~,<pbr1$
+    ~J_=~@7ik]a{~C{^emA$72>Gn{$K-]wKo\+,;<V0Ts{IZEn[->ZE|YO,{:o<!pY+Vw$\Oud{wsCp
+    $H]QXp^HQuoO2{v^5uwD1ss*Cj1GA!-j0?e*G|QGJ3zO;}jn>I6RwVxzAAQ:eavROlXCVoIGTrqO
+    DX*n,oCSa$Bkhvi-2W-D^<a},;hE@j<8s]^EenJ*cVOeTpk'E6<hG"t=KWK*},7
+`endprotected
+
+endmodule
