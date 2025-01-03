@@ -13,6 +13,7 @@ class FSR_parity_error_status_test extends uart_base_test;
     uvm_status_e	status;
 
     err_catcher.add_error_catcher_msg("Parity error polling flag is not triggered!");
+    uart_env.uart_sco.parity_checker_enb = 0;
 
     phase.raise_objection(this);
 
@@ -66,7 +67,7 @@ class FSR_parity_error_status_test extends uart_base_test;
       `uvm_info(get_type_name(), "Parity is error, clear the polling parity_error_status flag", UVM_NONE)
       #100000;
       uart_ip_regmodel.FSR.parity_error_status.set(PARITY_IS_ERROR_WRITE_1_TO_CLEAR);
-      uart_ip_regmodel.FSR.write(status, uart_ip_regmodel.FSR.get());
+      uart_ip_regmodel.FSR.write(status, 'b11010);
       `uvm_info(get_type_name(), $sformatf("Check parity_error_status flag after clear: 'b%b", uart_ip_regmodel.FSR.get()), UVM_NONE)
       uart_ip_regmodel.FSR.parity_error_status.read(status, rdata);
       if (rdata == 1'b0) `uvm_info(get_type_name(), "Parity error status is clear", UVM_NONE)
@@ -75,8 +76,22 @@ class FSR_parity_error_status_test extends uart_base_test;
       `uvm_error(get_type_name(), "Parity error polling flag is not triggered!")
     end
 
-
+    //uart_ip_regmodel.FSR.parity_error_status.set(1'b1);
+    //uart_ip_regmodel.FSR.write(status, uart_ip_regmodel.FSR.get());
+    
     #1000000;
+    uart_ip_regmodel.FSR.parity_error_status.read(status, rdata);
+    if (rdata != 1'b0) begin
+      `uvm_error(get_type_name(), "Parity error status is not cleared!")
+    end
+    else if (rdata == 1'b0) begin
+      `uvm_info(get_type_name(), "Parity error status is cleared!", UVM_NONE)
+    end
+
+    uart_ip_regmodel.TBR.write(status, 8'h24);
+    //transmit_duration = 64'd1000000000 / 9600;
+    //#transmit_duration;
+    #1600000;
 
     phase.drop_objection(this);
 

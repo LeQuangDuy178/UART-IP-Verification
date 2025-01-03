@@ -20,6 +20,9 @@ class uart_frame_WLS_oddparity_2stop_full_duplex_test extends uart_base_test;
     //wait (ahb_vif.HRESETn == 1'b1);
     //@(posedge ahb_vif.HCLK);
 
+    uart_env.uart_sco.single_trans_enb = 0;
+    uart_env.uart_sco.full_duplex_trans_enb = 1;
+
     for (int i = 0; i < 4; i++) begin
     
       // Full-duplex transfer between UART IP and UART VIP devices
@@ -77,7 +80,7 @@ class uart_frame_WLS_oddparity_2stop_full_duplex_test extends uart_base_test;
       uart_ip_regmodel.RBR.read(status, rdata);
       //#1000000;
 
-      #3000000; // Delay between each UART IP transfers (can be adjusted via baud gen)
+      #5000000; // Delay between each UART IP transfers (can be adjusted via baud gen)
 
       // Flag trigger finish transfer for next transfer
       /*

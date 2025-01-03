@@ -20,6 +20,9 @@ class uart_frame_WLS_oddparity_1stop_full_duplex_test extends uart_base_test;
     //wait (ahb_vif.HRESETn == 1'b1);
     //@(posedge ahb_vif.HCLK);
 
+    uart_env.uart_sco.single_trans_enb = 0;
+    uart_env.uart_sco.full_duplex_trans_enb = 1;
+
     for (int i = 0; i < 4; i++) begin
     
       // Full-duplex transfer between UART IP and UART VIP devices

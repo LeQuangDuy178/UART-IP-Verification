@@ -67,7 +67,7 @@ class uart_frame_change_mode_OTF_receive_only_test extends uart_base_test;
 
       uart_ip_regmodel.RBR.read(status, rdata);
 
-      #1200000;
+      #1600000;
 
       // Flag trigger finish transfer for next transfer
 

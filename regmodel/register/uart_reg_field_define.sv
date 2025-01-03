@@ -1,5 +1,18 @@
 // Define all register fields in enum type
 
+// Register addresses
+typedef enum bit [11:0] {
+  MDR_ADDR = 'h000,
+  DLL_ADDR = 'h004,
+  DLH_ADDR = 'h008,
+  LCR_ADDR = 'h00c,
+  IER_ADDR = 'h010,
+  FSR_ADDR = 'h014,
+  TBR_ADDR = 'h018,
+  RBR_ADDR = 'h01c,
+  RSVD_ADDR = 'h020
+} reg_base_offset_enum;
+
 //class uart_reg_field_define;
 typedef enum bit {
   OSM_SEL_16X = 1'b0,

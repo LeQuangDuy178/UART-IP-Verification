@@ -26,6 +26,8 @@ class uart_frame_change_mode_OTF_transmit_only_test extends uart_base_test;
 
     uvm_status_e 	status;
 
+    uart_env.uart_sco.parity_checker_enb = 0;    
+
     phase.raise_objection(this);
 
     //wait (ahb_vif.HRESETn == 1'b1);

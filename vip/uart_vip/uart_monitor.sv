@@ -195,6 +195,11 @@ task uart_monitor::capture_tx(inout uart_transaction uart_trans);
       `uvm_info({msg, "[TX]", "[IDLE State]"}, "Entered...", UVM_LOW)
       // Capture empty transfer 
       
+      // Get TX transfer time in idle state
+      tx_transfer_time = 64'd1000000000 / uart_config.baud_rate;
+      tx_half_transfer_time = tx_transfer_time / 2;
+      `uvm_info(msg, $sformatf("Check time TX %f", tx_transfer_time), UVM_LOW)
+
       // Wait for tx transite from 1 to 0
       //#10;
       @(negedge uart_vif.tx);
@@ -208,7 +213,12 @@ task uart_monitor::capture_tx(inout uart_transaction uart_trans);
 
     START: begin
       `uvm_info({msg, "[TX]", "[START State]"}, "Entered...", UVM_LOW)
-      // Capture nothing for 1 bit period 
+      // Capture nothing for 1 bit period
+      
+      tx_transfer_time = 64'd1000000000 / uart_config.baud_rate;
+      tx_half_transfer_time = tx_transfer_time / 2;
+      `uvm_info({msg, "[TX]"}, $sformatf("Check time TX %f", tx_transfer_time), UVM_NONE)
+
       #tx_transfer_time;
       // Next state
       state = DATA;
@@ -217,11 +227,15 @@ task uart_monitor::capture_tx(inout uart_transaction uart_trans);
 
     DATA: begin
       `uvm_info({msg, "[TX]", "[DATA State]"}, "Entered...", UVM_LOW)
+      `uvm_info({msg, "[TX Capture]"}, $sformatf("Check loop time TX data: %0b", uart_trans.data), UVM_NONE)
+      uart_trans.data = 8'h00; // Reset uart_trans.data
       #tx_half_transfer_time; // Move to middle of transfer
       for(int i = 0; i < uart_config.data_width; i++) begin
         //#tx_transfer_time/2; // Move to middle of transfer
 	uart_trans.data[i] = uart_vif.tx; // Capture at middle of 1-bit period
-	#tx_transfer_time; // Delay to next middle of 1-bit period
+	#tx_transfer_time; // Delay to next middle of 1-bit period	
+	//if (i == uart_config.data_width - 1) 
+		//`uvm_info({msg, "[TX Capture]"}, $sformatf("Check loop time TX data: %0b", uart_trans.data[i]), UVM_NONE)
       end
 
       // Checker check TX data
@@ -333,7 +347,12 @@ task uart_monitor::capture_rx(inout uart_transaction uart_trans_rx);
     IDLE: begin
       // Empty capture
       `uvm_info({msg, "[RX]", "[IDLE State]"}, "Entered...", UVM_LOW)
-      
+
+      // Get rx transfer time
+      rx_transfer_time = 64'd1000000000 / uart_config.baud_rate;
+      rx_half_transfer_time = rx_transfer_time / 2;
+      `uvm_info(msg, $sformatf("Check time RX %f", rx_transfer_time), UVM_LOW)
+
       // Next state, flag is stop bit - MSB first
       @(negedge uart_vif.rx);
       state_rx = START;
@@ -342,6 +361,10 @@ task uart_monitor::capture_rx(inout uart_transaction uart_trans_rx);
 
     START: begin
       `uvm_info({msg, "[RX]", "[START State]"}, "Entered...", UVM_LOW)
+
+      rx_transfer_time = 64'd1000000000 / uart_config.baud_rate;
+      rx_half_transfer_time = rx_transfer_time / 2;
+      `uvm_info({msg, "[RX]"}, $sformatf("Check time RX %f", rx_transfer_time), UVM_NONE)
 
       #rx_transfer_time;
       state_rx = DATA;
@@ -364,7 +387,8 @@ task uart_monitor::capture_rx(inout uart_transaction uart_trans_rx);
 
     DATA: begin
       `uvm_info({msg, "[RX]", "[DATA State]"}, "Entered...", UVM_LOW)
-
+      
+      uart_trans_rx.data = 8'h00; // Reset data
       #rx_half_transfer_time;	    
       for (int i = 0; i < uart_config.data_width; i++) begin
         //#tx_transfer_time/2; // Should capture at middle

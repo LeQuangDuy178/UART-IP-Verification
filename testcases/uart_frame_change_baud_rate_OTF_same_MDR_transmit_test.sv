@@ -36,7 +36,7 @@ class uart_frame_change_baud_rate_OTF_same_MDR_transmit_test extends uart_base_t
       // Full-duplex transfer between UART IP and UART VIP devices
       // UART VIP and UART IP send simultaneously
 
-      if (uart_vif.state_tx == uart_monitor::IDLE && uart_vif.state_rx == uart_monitor::IDLE) begin
+      //if (uart_vif.state_tx == uart_monitor::IDLE && uart_vif.state_rx == uart_monitor::IDLE) begin
       // UART VIP frame
       assert (uart_vip_config.randomize() with 
         {uart_vip_config.data_width == uart_configuration::WIDTH_8;
@@ -71,8 +71,8 @@ class uart_frame_change_baud_rate_OTF_same_MDR_transmit_test extends uart_base_t
       uart_ip_regmodel.LCR.BGE.set(BGE_ENBBAUDGEN);
       uart_ip_regmodel.LCR.write(status, uart_ip_regmodel.LCR.get());
 
-      #2000000;
-      end
+      #1000000;
+      //end
 
       //fork
       // 1st: VIP transfer via uart_vif.tx, observed in uart_rxd
@@ -82,7 +82,7 @@ class uart_frame_change_baud_rate_OTF_same_MDR_transmit_test extends uart_base_t
       //#1000000;
 
       // 2nd: IP transfer via uart_txd, observed in uart_vif.rx
-      wait (uart_vif.state_rx == uart_monitor::IDLE);
+      //wait (uart_vif.state_rx == uart_monitor::IDLE);
       uart_ip_regmodel.TBR.tx_data.set(8'ha6);
       //uart_ip_regmodel.TBR.update(status);
       uart_ip_regmodel.TBR.write(status, uart_ip_regmodel.TBR.get());
@@ -93,7 +93,7 @@ class uart_frame_change_baud_rate_OTF_same_MDR_transmit_test extends uart_base_t
       //uart_ip_regmodel.RBR.read(status, rdata);
       //#1000000;
 
-      #1500000; // Delay between each UART IP transfers (can be adjusted via baud gen)
+      #2000000; // Delay between each UART IP transfers (can be adjusted via baud gen)
 
       // Flag trigger finish transfer for next transfer
       /*

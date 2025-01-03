@@ -8,6 +8,7 @@ package test_pkg;
   import uart_regmodel_pkg::*;
 
   // Base test
+  `include "uart_rand_operation.sv"
   `include "uart_error_catcher.sv"
   `include "uart_base_test.sv"
   
@@ -117,5 +118,8 @@ package test_pkg;
   //`include "error_TX_FIFO_overflow_test.sv"
   //`include "error_RX_FIFO_underflow_test.sv"
   //`include "error_PARITY_test.sv"
+
+  // Random test
+  `include "random_uart_frame_operation_test.sv"
 
 endpackage

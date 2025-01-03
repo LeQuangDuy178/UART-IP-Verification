@@ -59,7 +59,7 @@ class uart_frame_WLS_oddparity_2stop_receive_only_test extends uart_base_test;
 
       uart_ip_regmodel.RBR.read(status, rdata);
 
-      #1000000;
+      #1200000;
 
       // Flag trigger finish transfer for next transfer
 

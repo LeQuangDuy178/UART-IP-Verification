@@ -31,6 +31,9 @@ class uart_frame_change_mode_middle_and_OTF_full_duplex_test extends uart_base_t
     //wait (ahb_vif.HRESETn == 1'b1);
     //@(posedge ahb_vif.HCLK);
 
+    uart_env.uart_sco.single_trans_enb = 0;
+    uart_env.uart_sco.full_duplex_trans_enb = 1;
+
     for (int i = 0; i < uart_ip_WLS_arr.size(); i++) begin
     
       // Full-duplex transfer between UART IP and UART VIP devices
@@ -93,7 +96,7 @@ class uart_frame_change_mode_middle_and_OTF_full_duplex_test extends uart_base_t
       uart_ip_regmodel.RBR.read(status, rdata);
       //#1000000;
       //join
-      #1500000; // Delay between each UART IP transfers (can be adjusted via baud gen)
+      #2000000; // Delay between each UART IP transfers (can be adjusted via baud gen)
       //join
       // Flag trigger finish transfer for next transfer
       /*

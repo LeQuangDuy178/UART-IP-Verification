@@ -22,6 +22,7 @@ class TX_RX_FIFO_full_full_duplex_test extends uart_base_test;
     uvm_status_e	status;
 
     uart_env.uart_sco.checker_enb = 0;
+    uart_env.uart_sco.trans_disp_enb = 0;
 
     phase.raise_objection(this);
 
@@ -69,34 +70,41 @@ class TX_RX_FIFO_full_full_duplex_test extends uart_base_test;
     uart_ip_regmodel.IER.write(status, uart_ip_regmodel.IER.get());
 
     // Write to TBR 16 times before it finish 1st transmit
-    for (int i = 0; i < 18; i++) begin
+    fork
+      for (int i = 0; i < 18; i++) begin
 
     //#1000000;
 
-      uart_data.parity_constraint.constraint_mode(0);    
-      assert(uart_data.randomize()) else `uvm_error(get_type_name(), "Randomization failed!")
+        uart_data.parity_constraint.constraint_mode(0);    
+        assert(uart_data.randomize()) else `uvm_error(get_type_name(), "Randomization failed!")
 
-      fork	      
+      //fork	      
         uart_ip_regmodel.TBR.tx_data.set(uart_data.data);
         uart_ip_regmodel.TBR.write(status, uart_ip_regmodel.TBR.get());
-
-        uart_simplex_seq.start(uart_env.uart_agt.uart_seqr);
-      join
-
-      if (i == 17) begin
-        
       end
+      
+      for (int i = 0; i < 18; i++) begin
+        uart_simplex_seq.start(uart_env.uart_agt.uart_seqr);
+      end
+
+     join_any
+
+      //if (i == 17) begin
+        
+      //end
 
     //#1600000;
     // Checker for interrupt trigger alongside polling
     //if (i == 17) begin
-      
+     
+      //-------------------------------------------------------------------------
+      // Check TX FULL
       if (intr_vif.interrupt == 1'b1) begin
         uart_ip_regmodel.FSR.tx_full_status.read(status, rdata);
 	tx_fifo_full_flag = rdata;
 	
-	uart_ip_regmodel.FSR.rx_full_status.read(status, rdata);
-        rx_fifo_full_flag = rdata;
+	//uart_ip_regmodel.FSR.rx_full_status.read(status, rdata);
+        //rx_fifo_full_flag = rdata;
 
 	if (tx_fifo_full_flag == intr_vif.interrupt) begin
           `uvm_info(get_type_name(), "Interrupt is triggered with polling TX Full", UVM_NONE)
@@ -104,10 +112,22 @@ class TX_RX_FIFO_full_full_duplex_test extends uart_base_test;
         else begin
           `uvm_error(get_type_name(), "Interrupt is not triggered with polling TX Full")
         end
-
+      
         // Get size of 16-byte FIFO when interrupt trigger
-	tx_fifo_size = i - 1;
+	tx_fifo_size = 17 - 1;
 	`uvm_info(get_type_name(), $sformatf("TX FIFO is full at %0d-byte boundary", tx_fifo_size), UVM_NONE)
+       
+      //------------------------------------------------------------------------
+      // Check RX FULL
+      // Disable TX FULL interrupt first
+      wait (intr_vif.interrupt == 1'b0);
+      uart_ip_regmodel.IER.en_tx_fifo_full.set(DIS_TX_FULL);
+      uart_ip_regmodel.IER.en_rx_fifo_full.set(EN_RX_FULL);
+      uart_ip_regmodel.IER.write(status, uart_ip_regmodel.IER.get());
+
+      @(posedge intr_vif.interrupt);
+      uart_ip_regmodel.FSR.rx_full_status.read(status, rdata);
+      rx_fifo_full_flag = rdata;
 
         if (rx_fifo_full_flag == intr_vif.interrupt) begin
           `uvm_info(get_type_name(), "Interrupt is triggered with polling RX Full", UVM_NONE)
@@ -117,9 +137,9 @@ class TX_RX_FIFO_full_full_duplex_test extends uart_base_test;
         end
 
         // Get size of 16-byte FIFO when interrupt trigger
-        rx_fifo_size = i - 1;
+        rx_fifo_size = 17 - 1;
         `uvm_info(get_type_name(), $sformatf("RX FIFO is full at %0d-byte boundary", rx_fifo_size), UVM_NONE)
-
+      
 
       end
       else begin
@@ -129,9 +149,9 @@ class TX_RX_FIFO_full_full_duplex_test extends uart_base_test;
 
     //end
 
-    end
+    //end
 
-    //#2400000;
+    #2400000;
 
     phase.drop_objection(this);
 

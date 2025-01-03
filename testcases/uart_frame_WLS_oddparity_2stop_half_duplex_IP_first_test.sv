@@ -62,7 +62,7 @@ class uart_frame_WLS_oddparity_2stop_half_duplex_IP_first_test extends uart_base
 	uart_simplex_seq.uart_config = uart_vip_config;
 	uart_simplex_seq.start(uart_env.uart_agt.uart_seqr);
 	uart_ip_regmodel.RBR.read(status, rdata);
-	#1000000;
+	#1200000;
       end
       
       else begin 
@@ -71,7 +71,7 @@ class uart_frame_WLS_oddparity_2stop_half_duplex_IP_first_test extends uart_base
 	uart_simplex_seq.uart_config = uart_vip_config;
         uart_simplex_seq.start(uart_env.uart_agt.uart_seqr);
 	uart_ip_regmodel.RBR.read(status, rdata);
-	#1000000;
+	#1200000;
       end
 
     end

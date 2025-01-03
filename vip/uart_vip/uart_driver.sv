@@ -140,6 +140,11 @@ task uart_driver::drive(inout uart_transaction req);
 
     START: begin
       `uvm_info({msg, "[START state]"}, "Entered...", UVM_LOW)
+ 
+      // Get transfer time based on config on start
+      tx_transfer_time = 64'd1000000000 / uart_config.baud_rate;
+      `uvm_info({msg, "[run_phase]"}, $sformatf("Check time tx %f", tx_transfer_time), UVM_NONE)
+
       uart_vif.tx = 1'b0; // 1 start bit transition from 1 to 0
       #tx_transfer_time;
       //#50;  

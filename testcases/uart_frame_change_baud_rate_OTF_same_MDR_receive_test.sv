@@ -69,6 +69,7 @@ class uart_frame_change_baud_rate_OTF_same_MDR_receive_test extends uart_base_te
 
       //#3000000; // Delay between each transfers (can be adjusted via baud gen)
 
+      wait (uart_vif.state_tx == uart_monitor::IDLE);
       uart_ip_regmodel.RBR.read(status, rdata);
 
       #1200000;

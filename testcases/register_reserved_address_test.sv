@@ -39,8 +39,9 @@ class register_reserved_address_test extends uart_base_test;
     // If at HRESP, wdata = wdata of sequence then write is not affected
 
     if (ahb_vif.HRESP == 1'b1) begin
+    `uvm_info(get_type_name(), "Write to reserved address where HRESP is triggered", UVM_NONE)
     if (ahb_vif.HWDATA == ahb_write_seq.req.data) begin
-      `uvm_info(get_type_name(), $sformatf("Write not affect to this addr: 'h%h", ahb_vif.HWDATA), UVM_LOW)
+      `uvm_info(get_type_name(), $sformatf("Write not affect to this addr: 'h%h", ahb_vif.HWDATA), UVM_NONE)
     end
     else begin
       `uvm_error(get_type_name(), "Write is affected, Error")
@@ -50,9 +51,9 @@ class register_reserved_address_test extends uart_base_test;
     ahb_read_seq.start(uart_env.ahb_agt.sequencer);
 
     if (ahb_vif.HRESP == 1'b1) begin
-    //@(posedge ahb_vif.HRESP);
+    `uvm_info(get_type_name(), "Read from reserved address where HRESP is triggered", UVM_NONE)
     if (ahb_vif.HRDATA == 32'hffffffff) begin
-      `uvm_info(get_type_name(), $sformatf("Read this addr as: 'h%h", ahb_vif.HRDATA), UVM_LOW)
+      `uvm_info(get_type_name(), $sformatf("Read this addr as: 'h%h", ahb_vif.HRDATA), UVM_NONE)
     end
     else begin
       `uvm_error(get_type_name(), "Not read as ffff_ffff, Error");
