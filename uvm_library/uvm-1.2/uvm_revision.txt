@@ -1,0 +1,1 @@
+UVM Version 1.2 library path for UART IP Verification Project
