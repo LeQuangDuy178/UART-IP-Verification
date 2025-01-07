@@ -10,7 +10,7 @@ TESTNAME  ?=uart_frame_WLS_noparity_1stop_transmit_only_test
 VERBOSITY ?=UVM_NONE
 RUNARG    ?=
 SEED      ?=1
-COV       ?=OFF
+COV       ?=ON
 
 #==============================
 ifeq ($(COV),ON)
