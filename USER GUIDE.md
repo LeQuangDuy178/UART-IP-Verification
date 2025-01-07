@@ -1,5 +1,6 @@
 # UART IP Verification
  UART IP Verification using UVM - User Guide
+ 
  UVM 1.2 base class library directory is uvm_library/uvm-1.2/
 
  1. Run basic test simulation
