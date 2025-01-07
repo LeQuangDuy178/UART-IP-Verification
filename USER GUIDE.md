@@ -1,5 +1,6 @@
 # UART IP Verification
  UART IP Verification using UVM - User Guide
+ UVM 1.2 base class library directory is uvm_library/uvm-1.2/
 
  1. Run basic test simulation
  - In sim directory, type "source project_env.bash", this will link the uvm 1.2 base class library and create the environment variables for all of the associate directories in the working environment. These variables will be able to view all the files within the working environment and compile them in building process.
